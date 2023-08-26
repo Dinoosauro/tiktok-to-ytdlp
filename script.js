@@ -1,3 +1,4 @@
+// Using var so that the script can be re-used also in WebKit & Gecko
 var scriptOptions = {
     scrolling_min_time: 1300, // Change the mininum time the script will try to refresh the page
     scrolling_max_time: 2100, // Change the maxinum time the script will try to refresh the page
@@ -5,25 +6,25 @@ var scriptOptions = {
     min_views: -1, // If a video has fewer views than this, it won't be included in the script.
     delete_from_next_txt: true, // Delete all the items put in the previous .txt file when asking for a new one. Useful only if you want to obtain a .txt file while scrolling.
 }
-
+// SCRIPT START:
 var height = document.body.scrollHeight;
-var containerSets = [[], []];
-var skipLinks = [];
+var containerSets = [[], []]; // Array: [[Video link], [Video views]]
+var skipLinks = []; // Array: [Video link to skip]
 function loadWebpage() {
-    if (document.body.innerHTML.indexOf("class=\"tiktok-qmnyxf-SvgContainer\">") == -1) { // Checks if the SVG loading animation is present in the DOM
+    if (document.querySelectorAll(".tiktok-qmnyxf-SvgContainer").length === 0) { // Checks if the SVG loading animation is present in the DOM
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // Scroll to the bottom of the page
-        setTimeout(function () {
+        setTimeout(() => {
             if (height !== document.body.scrollHeight) { // The webpage has scrolled the previous time, so we can try another scroll
                 if (!scriptOptions.get_array_after_scroll) addArray(); 
-                setTimeout(function () {
+                setTimeout(() => {
                     height = document.body.scrollHeight;
                     loadWebpage();
                 }, Math.floor(Math.random() * scriptOptions.scrolling_max_time + scriptOptions.scrolling_min_time));
             } else { // 
-                setTimeout(function() {
-                    if (document.body.innerHTML.indexOf("class=\"tiktok-qmnyxf-SvgContainer\">") == -1 && height == document.body.scrollHeight) { // By scrolling, the webpage height doesn't change, so let's download the txt file
+                setTimeout(() => {
+                    if (document.querySelectorAll(".tiktok-qmnyxf-SvgContainer").length === 0 && height == document.body.scrollHeight) { // By scrolling, the webpage height doesn't change, so let's download the txt file
                         ytDlpScript();        
-                    } else { // The SVG animation is still present, there are other contents to load.
+                    } else { // The SVG animation is still there, so there are other contents to load.
                         loadWebpage();
                     }
                 }, 3500)
@@ -37,16 +38,13 @@ function loadWebpage() {
 }
 loadWebpage();
 function addArray() {
-    var getClass = document.getElementsByClassName("tiktok-x6y88p-DivItemContainerV2"); // Class of every video container
+    var getClass = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2"); // Class of every video container
     for (var i = 0; i < getClass.length; i++) {
         // Simple information scraping: the link (getLink) is put in the first array, while the views (getViews) are put in the second one
-        var getLink = getClass[i].innerHTML.substring(getClass[i].innerHTML.indexOf("<a href=\"")).replace("<a href=\"", "");
-        getLink = getLink.substring(0, getLink.indexOf("\""));
-        if (containerSets[0].indexOf(getLink) == -1 && skipLinks.indexOf(getLink) == -1) {
+        var getLink = getClass[i].querySelector("[data-e2e=user-post-item-desc]").querySelector("a").href;
+        if (containerSets[0].indexOf(getLink) === -1 && skipLinks.indexOf(getLink) === -1) {
             containerSets[0].push(getLink);
-            var getViews = getClass[i].innerHTML.substring(getClass[i].innerHTML.indexOf("video-views"));
-            getViews = getViews.substring(getViews.indexOf(">") + 1);
-            containerSets[1].push(getViews.substring(0, getViews.indexOf("<")).replace(".", "").replace("K", "00").replace("M", "00000"));
+            containerSets[1].push(getClass[i].querySelector("[data-e2e=video-views]").innerHTML.replace("K", "00").replace("M", "00000"));
         }
     }
 }
