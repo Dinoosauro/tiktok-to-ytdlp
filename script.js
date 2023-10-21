@@ -41,10 +41,10 @@ function addArray() {
     var getClass = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2"); // Class of every video container
     for (var i = 0; i < getClass.length; i++) {
         // Simple information scraping: the link (getLink) is put in the first array, while the views (getViews) are put in the second one
-        var getLink = getClass[i].querySelector("[data-e2e=user-post-item-desc]").querySelector("a").href;
+        var getLink = (getClass[i].querySelector("[data-e2e=user-post-item-desc]") ?? getClass[i].querySelector("[data-e2e=user-liked-item]") ?? getClass[i].querySelector("[data-e2e=music-item]") ?? getClass[i].querySelector("[data-e2e=user-post-item]") ?? getClass[i].querySelector("[favorites-item]")).querySelector("a").href;
         if (containerSets[0].indexOf(getLink) === -1 && skipLinks.indexOf(getLink) === -1) {
             containerSets[0].push(getLink);
-            containerSets[1].push(getClass[i].querySelector("[data-e2e=video-views]").innerHTML.replace("K", "00").replace("M", "00000"));
+            containerSets[1].push(((getClass[i].querySelector("[data-e2e=video-views]"))?.innerHTML ?? "0").replace("K", "00").replace("M", "00000"));
         }
     }
 }
