@@ -17,7 +17,6 @@ By default, the links in the first intermediate files will be deleted from the f
 ## Script options
 You can edit the values of the first five lines of the script to change some useful settings:
 - ```scrolling_min_time``` & ```scrolling_max_time```: change the thread sleeps between a scroll and the next one.
-- ```get_array_after_scroll```: change this if you want to fetch all the TikTok videos when the script has finished scrolling, and not after every single scroll. Keep in mind that it seems that TikTok doesn't unappend the previous videos, so this option shouldn't be relevant, but this might change in the future.
 - ```min_views```: don't add a video to the text file if it has fewer than _x_ views.
 - ```delete_from_next_txt```: put this to false if you want that the final txt files has all the links, even the ones you've already downloaded with intermediate files. 
 - ```output_name_type```: choose the format for the output file name. Valid inputs are:
@@ -27,6 +26,12 @@ You can edit the values of the first five lines of the script to change some use
     * 2 (as integer): the first title on the page (h1 HTML elmenet) will be used
     * Any other value: "TikTokLinks.txt" will be used as a file name
 - ```adapt_text_output```: replace Windows unsafe characters for the output file name.
+### Advanced script options
+These really useful options permit to change how the script fetches data, and what it should do when errors are found.
+- ```get_array_after_scroll```: change this if you want to fetch all the TikTok videos when the script has finished scrolling, and not after every single scroll. Keep in mind that it seems that TikTok doesn't unappend the previous videos, so this option shouldn't be relevant, but this might change in the future.
+- ```get_link_by_filter```: use the new method of getting all the links in a video container, and then look for the one that contains the video URL structure. If false, the "old" method of using data attributes will be used (even if I couldn't find more tags, I can't garantee that this old method has all of them).
+- ```check_nullish_link```: Check if the link is nullish, and, since it would be useless to append it, continue with the next link. It's reccomended to leave this set to true.
+- ```log_link_error```: Write to the console if a link is nullish. 
 ## Warning:
 This script is licensed under the MIT license.
 

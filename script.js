@@ -2,11 +2,16 @@
 var scriptOptions = {
     scrolling_min_time: 1300, // Change the mininum time the script will try to refresh the page
     scrolling_max_time: 2100, // Change the maxinum time the script will try to refresh the page
-    get_array_after_scroll: false, // Gets the item links after the webpage is fully scrolled, and not after every scroll.
     min_views: -1, // If a video has fewer views than this, it won't be included in the script.
     delete_from_next_txt: true, // Delete all the items put in the previous .txt file when asking for a new one. Useful only if you want to obtain a .txt file while scrolling.
     output_name_type: 2, // Put a string to specify a specific name of the file. Put 0 for trying to fetching it using data tags, 1 for fetching it from the window title, 2 for fetching it from the first "h1" element. _Invalid_ inputs will use the standard "TikTokLinks.txt". This will be edited if a different value is passed from the startDownload() function.
-    adapt_text_output: true // Replace characters that are prohibited on Windows
+    adapt_text_output: true, // Replace characters that are prohibited on Windows
+    advanced: {
+        get_array_after_scroll: false, // Gets the item links after the webpage is fully scrolled, and not after every scroll.
+        get_link_by_filter: true, // Get the website link by inspecting all the links in the container div, instead of looking for data references.
+        check_nullish_link: true, // Check if a link is nullish and, if true, try with the next video.
+        log_link_error: true, // Write in the console if there's an error when fetching the link.
+    }
 }
 // SCRIPT START:
 var height = document.body.scrollHeight;
@@ -17,7 +22,7 @@ function loadWebpage() {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // Scroll to the bottom of the page
         setTimeout(() => {
             if (height !== document.body.scrollHeight) { // The webpage has scrolled the previous time, so we can try another scroll
-                if (!scriptOptions.get_array_after_scroll) addArray();
+                if (!scriptOptions.advanced.get_array_after_scroll) addArray();
                 setTimeout(() => {
                     height = document.body.scrollHeight;
                     loadWebpage();
@@ -42,14 +47,18 @@ function addArray() {
     var getClass = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2"); // Class of every video container
     for (var i = 0; i < getClass.length; i++) {
         // Simple information scraping: the link (getLink) is put in the first array, while the views (getViews) are put in the second one
-        var getLink = (getClass[i].querySelector("[data-e2e=user-post-item-desc]") ?? getClass[i].querySelector("[data-e2e=user-liked-item]") ?? getClass[i].querySelector("[data-e2e=music-item]") ?? getClass[i].querySelector("[data-e2e=user-post-item]") ?? getClass[i].querySelector("[data-e2e=favorites-item]") ?? getClass[i].querySelector("[data-e2e=challenge-item]")).querySelector("a").href;
-        if (containerSets[0].indexOf(getLink) === -1 && skipLinks.indexOf(getLink) === -1) {
+        var getLink = scriptOptions.advanced.get_link_by_filter ? Array.from(getClass[i].querySelectorAll("a")).filter(e => e.href.indexOf("/video/") !== -1)[0]?.href : (getClass[i].querySelector("[data-e2e=user-post-item-desc]") ?? getClass[i].querySelector("[data-e2e=user-liked-item]") ?? getClass[i].querySelector("[data-e2e=music-item]") ?? getClass[i].querySelector("[data-e2e=user-post-item]") ?? getClass[i].querySelector("[data-e2e=favorites-item]") ?? getClass[i].querySelector("[data-e2e=challenge-item]")).querySelector("a")?.href; // If the new filter method is selected, the script will look for the first link that contains a video link structure. Otherwise, the script'll look for data tags that contain the video URL.
+        if (scriptOptions.advanced.check_nullish_link && (getLink ?? "") === "") { // If the script needs to check if the link is nullish, and it's nullish...
+            if (scriptOptions.advanced.log_link_error) console.log("SCRIPT ERROR: Failed to get link!"); // If the user wants to print the error in the console, write it
+            continue; // And, in general, continue with the next link.
+        } 
+        if (containerSets[0].indexOf(getLink) === -1 && skipLinks.indexOf(getLink) === -1) { // If the link hasn't been used, add it to the ContainerSets.
             containerSets[0].push(getLink);
             containerSets[1].push(((getClass[i].querySelector("[data-e2e=video-views]"))?.innerHTML ?? "0").replace("K", "00").replace("M", "00000"));
         }
     }
 }
-function sanitizeName(name) {
+function sanitizeName(name) { // Replace a name with allowed Windows characters.
     return name.replaceAll("<", "‹").replaceAll(">", "›").replaceAll(":", "∶").replaceAll("\"", "″").replaceAll("/", "∕").replaceAll("\\", "∖").replaceAll("|", "¦").replaceAll("?", "¿").replaceAll("*", "");
 }
 function ytDlpScript() {
