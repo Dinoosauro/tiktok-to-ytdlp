@@ -20,6 +20,13 @@ You can edit the values of the first five lines of the script to change some use
 - ```get_array_after_scroll```: change this if you want to fetch all the TikTok videos when the script has finished scrolling, and not after every single scroll. Keep in mind that it seems that TikTok doesn't unappend the previous videos, so this option shouldn't be relevant, but this might change in the future.
 - ```min_views```: don't add a video to the text file if it has fewer than _x_ views.
 - ```delete_from_next_txt```: put this to false if you want that the final txt files has all the links, even the ones you've already downloaded with intermediate files. 
+- ```output_name_type```: choose the format for the output file name. Valid inputs are:
+    * A generic string: the file name will be exactly that
+    * 0 (as integer; default): try fetching the title from some data tags
+    * 1 (as integer): the webpage title will be used
+    * 2 (as integer): the first title on the page (h1 HTML elmenet) will be used
+    * Any other value: "TikTokLinks.txt" will be used as a file name
+- ```adapt_text_output```: replace Windows unsafe characters for the output file name.
 ## Warning:
 This script is licensed under the MIT license.
 
