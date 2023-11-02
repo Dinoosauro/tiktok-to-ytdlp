@@ -21,9 +21,9 @@ You can edit the values of the first five lines of the script to change some use
 - ```delete_from_next_txt```: put this to false if you want that the final txt files has all the links, even the ones you've already downloaded with intermediate files. 
 - ```output_name_type```: choose the format for the output file name. Valid inputs are:
     * A generic string: the file name will be exactly that
-    * 0 (as integer; default): try fetching the title from some data tags
+    * 0 (as integer): try fetching the title from some data tags
     * 1 (as integer): the webpage title will be used
-    * 2 (as integer): the first title on the page (h1 HTML elmenet) will be used
+    * 2 (as integer; default): the first title on the page (h1 HTML elmenet) will be used
     * Any other value: "TikTokLinks.txt" will be used as a file name
 - ```adapt_text_output```: replace Windows unsafe characters for the output file name.
 ### Advanced script options
