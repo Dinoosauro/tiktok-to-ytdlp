@@ -77,13 +77,13 @@ function downloadScript(script) { // Download the script text to a file
     var name = "TikTokLinks.txt"; // Set the standard name
     switch (scriptOptions.output_name_type) { // Look at the type of the name
         case 0: // Fetch name from data tags
-            name = document.querySelector("[data-e2e=user-title]")?.textContent ?? document.querySelector("[data-e2e=browse-username]")?.firstChild?.textContent ?? document.querySelector("[data-e2e=browse-username]")?.textContent ?? document.querySelector("[data-e2e=challenge-title]")?.textContent ?? document.querySelector("[data-e2e=music-title]")?.textContent ?? "TikTokLinks.txt";
+            name = document.querySelector("[data-e2e=user-title]")?.textContent.trim() ?? document.querySelector("[data-e2e=browse-username]")?.firstChild?.textContent.trim() ?? document.querySelector("[data-e2e=browse-username]")?.textContent.trim() ?? document.querySelector("[data-e2e=challenge-title]")?.textContent.trim() ?? document.querySelector("[data-e2e=music-title]")?.textContent.trim() ?? "TikTokLinks.txt";
             break;
         case 1: // Fetch name from the website title
             name = `${document.title.substring(0, document.title.indexOf(" | TikTok"))}.txt`;
             break;
         case 2: // Fetch name from the first "h1" element on the page
-            name = `${document.querySelector("h1")?.textContent ?? "TikTokLinks"}.txt`;
+            name = `${document.querySelector("h1")?.textContent.trim() ?? "TikTokLinks"}.txt`;
             break;
     }
     if (typeof scriptOptions.output_name_type === "string") name = scriptOptions.output_name_type; // If it's a string, apply it to the output name
