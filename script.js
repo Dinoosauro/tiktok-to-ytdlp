@@ -44,14 +44,14 @@ function loadWebpage() {
     }
 }
 function addArray() {
-    var getClass = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2"); // Class of every video container
+    var getClass = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2, .css-x6y88p-DivItemContainerV2"); // Class of every video container
     for (var i = 0; i < getClass.length; i++) {
         // Simple information scraping: the link (getLink) is put in the first array, while the views (getViews) are put in the second one
         var getLink = scriptOptions.advanced.get_link_by_filter ? Array.from(getClass[i].querySelectorAll("a")).filter(e => e.href.indexOf("/video/") !== -1)[0]?.href : (getClass[i].querySelector("[data-e2e=user-post-item-desc]") ?? getClass[i].querySelector("[data-e2e=user-liked-item]") ?? getClass[i].querySelector("[data-e2e=music-item]") ?? getClass[i].querySelector("[data-e2e=user-post-item]") ?? getClass[i].querySelector("[data-e2e=favorites-item]") ?? getClass[i].querySelector("[data-e2e=challenge-item]")).querySelector("a")?.href; // If the new filter method is selected, the script will look for the first link that contains a video link structure. Otherwise, the script'll look for data tags that contain the video URL.
         if (scriptOptions.advanced.check_nullish_link && (getLink ?? "") === "") { // If the script needs to check if the link is nullish, and it's nullish...
             if (scriptOptions.advanced.log_link_error) console.log("SCRIPT ERROR: Failed to get link!"); // If the user wants to print the error in the console, write it
             continue; // And, in general, continue with the next link.
-        } 
+        }
         if (containerSets[0].indexOf(getLink) === -1 && skipLinks.indexOf(getLink) === -1) { // If the link hasn't been used, add it to the ContainerSets.
             containerSets[0].push(getLink);
             containerSets[1].push(((getClass[i].querySelector("[data-e2e=video-views]"))?.innerHTML ?? "0").replace("K", "00").replace("M", "00000"));
