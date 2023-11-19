@@ -11,6 +11,19 @@ var scriptOptions = {
         get_link_by_filter: true, // Get the website link by inspecting all the links in the container div, instead of looking for data references.
         check_nullish_link: true, // Check if a link is nullish and, if true, try with the next video.
         log_link_error: true, // Write in the console if there's an error when fetching the link.
+    },
+    node: {
+        resolve: null,
+        isNode: false,
+        isResolveTime: false
+    }
+}
+function nodeElaborateCustomArgs(customTypes) { // A function that is able to read a double array, composed with [["the property name", "the property value"]], and change the value of the scriptOptions array
+    if ((customTypes ?? "") !== "") { // If the provided value isn't nullish
+        customTypes.forEach(e => { // Get each value
+            let optionChange = e[0].split("=>"); // The arrow (=>) is used to indicate that the property is in a nested object (ex: advanced=>log_link_error).
+            optionChange.length === 1 ? scriptOptions[e[0]] = e[1] : scriptOptions[optionChange[0]][optionChange[1]] = e[1]; // If the length is 1, just change the option. Otherwise, look for the nested object and change its value
+        });
     }
 }
 // SCRIPT START:
@@ -30,6 +43,7 @@ function loadWebpage() {
             } else { // 
                 setTimeout(() => {
                     if (document.querySelectorAll(".tiktok-qmnyxf-SvgContainer").length === 0 && height == document.body.scrollHeight) { // By scrolling, the webpage height doesn't change, so let's download the txt file
+                        scriptOptions.node.isResolveTime = true;
                         ytDlpScript();
                     } else { // The SVG animation is still there, so there are other contents to load.
                         loadWebpage();
@@ -69,9 +83,13 @@ function ytDlpScript() {
         if (parseInt(containerSets[1][x]) < scriptOptions.min_views) continue;
         ytDlpScript += `${containerSets[0][x]}\n`;
     }
-    downloadScript(ytDlpScript);
+    if (scriptOptions.node.isNode && !scriptOptions.node.isResolveTime) return ytDlpScript.split("\n"); else downloadScript(ytDlpScript); // If the user has requested from Node to get the array, get it
 }
 function downloadScript(script) { // Download the script text to a file
+    if (scriptOptions.node.isNode) {
+        if (scriptOptions.node.isResolveTime) scriptOptions.node.resolve(script.split("\n")); else return script.split("\n");
+        return;
+    }
     var blob = new Blob([script], { type: "text/plain" }); // Create a blob with the text
     var link = document.createElement("a");
     var name = "TikTokLinks.txt"; // Set the standard name
@@ -95,14 +113,21 @@ function downloadScript(script) { // Download the script text to a file
 }
 function requestTxtNow() {
     // Write requestTxtNow() in the console to obtain the .txt file while converting. Useful if you have lots of items, and you want to start downloading them.
-    ytDlpScript();
+    let value = ytDlpScript();
     if (scriptOptions.delete_from_next_txt) { // If delete_from_next_txt is enabled, delete the old items, so that only the newer ones will be downloaded.
         skipLinks.push(...containerSets[0]);
         containerSets = [[], []];
     }
+    return value;
 }
 function startDownload(name) {
     if ((name ?? "") !== "") scriptOptions.output_name_type = name; // Update the file name type if it's provided a non-nullish value
-    loadWebpage(); // And start scrolling the webpage
+    if (scriptOptions.node.isNode) {
+        return new Promise((resolve) => {
+            scriptOptions.node.resolve = resolve;
+            loadWebpage();
+        })
+    } else loadWebpage(); // And start scrolling the webpage
 }
+nodeElaborateCustomArgs();
 startDownload(); // Add as an argument a custom file name (or a custom file type value), or edit it from the scriptOptions.output_name_type
