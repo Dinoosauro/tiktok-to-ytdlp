@@ -6,11 +6,13 @@ var scriptOptions = {
     delete_from_next_txt: true, // Delete all the items put in the previous .txt file when asking for a new one. Useful only if you want to obtain a .txt file while scrolling.
     output_name_type: 2, // Put a string to specify a specific name of the file. Put 0 for trying to fetching it using data tags, 1 for fetching it from the window title, 2 for fetching it from the first "h1" element. _Invalid_ inputs will use the standard "TikTokLinks.txt". This will be edited if a different value is passed from the startDownload() function.
     adapt_text_output: true, // Replace characters that are prohibited on Windows
+    allow_images: true, // Save also TikTok Image URLs
     advanced: {
         get_array_after_scroll: false, // Gets the item links after the webpage is fully scrolled, and not after every scroll.
         get_link_by_filter: true, // Get the website link by inspecting all the links in the container div, instead of looking for data references.
         check_nullish_link: true, // Check if a link is nullish and, if true, try with the next video.
         log_link_error: true, // Write in the console if there's an error when fetching the link.
+        maximum_downloads: Infinity // Change this to a finite number to fetch only a specific number of values. Note that a) more elements might be added to the final file if available; and b) "get_array_after_scroll" must be set to false.
     },
     node: {
         resolve: null,
@@ -35,7 +37,13 @@ function loadWebpage() {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // Scroll to the bottom of the page
         setTimeout(() => {
             if (height !== document.body.scrollHeight) { // The webpage has scrolled the previous time, so we can try another scroll
-                if (!scriptOptions.advanced.get_array_after_scroll) addArray();
+                if (!scriptOptions.advanced.get_array_after_scroll) {
+                    addArray();
+                    if (scriptOptions.advanced.maximum_downloads < (containerSets[0].length + skipLinks.length)) { // If the number of fetched items is above the permitted one, download the script and don't do anything.
+                        ytDlpScript();
+                        return;
+                    }
+                }
                 setTimeout(() => {
                     height = document.body.scrollHeight;
                     loadWebpage();
@@ -58,10 +66,12 @@ function loadWebpage() {
     }
 }
 function addArray() {
-    var getClass = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2, .css-x6y88p-DivItemContainerV2"); // Class of every video container
+    var getClass = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2, .css-x6y88p-DivItemContainerV2, .css-1soki6-DivItemContainerForSearch"); // Class of every video container
     for (var i = 0; i < getClass.length; i++) {
         // Simple information scraping: the link (getLink) is put in the first array, while the views (getViews) are put in the second one
-        var getLink = scriptOptions.advanced.get_link_by_filter ? Array.from(getClass[i].querySelectorAll("a")).filter(e => e.href.indexOf("/video/") !== -1)[0]?.href : (getClass[i].querySelector("[data-e2e=user-post-item-desc]") ?? getClass[i].querySelector("[data-e2e=user-liked-item]") ?? getClass[i].querySelector("[data-e2e=music-item]") ?? getClass[i].querySelector("[data-e2e=user-post-item]") ?? getClass[i].querySelector("[data-e2e=favorites-item]") ?? getClass[i].querySelector("[data-e2e=challenge-item]")).querySelector("a")?.href; // If the new filter method is selected, the script will look for the first link that contains a video link structure. Otherwise, the script'll look for data tags that contain the video URL.
+        if (!getClass[i]) continue; // Skip nullish results
+        var getLink = scriptOptions.advanced.get_link_by_filter ? Array.from(getClass[i].querySelectorAll("a")).filter(e => e.href.indexOf("/video/") !== -1 || e.href.indexOf("/photo/") !== -1)[0]?.href : getClass[i].querySelector("[data-e2e=user-post-item-desc], [data-e2e=user-liked-item], [data-e2e=music-item], [data-e2e=user-post-item], [data-e2e=favorites-item], [data-e2e=challenge-item], [data-e2e=search_top-item]")?.querySelector("a")?.href; // If the new filter method is selected, the script will look for the first link that contains a video link structure. Otherwise, the script'll look for data tags that contain the video URL.
+        if (!scriptOptions.allow_images && getLink.indexOf("/photo/") !== -1) continue; // Avoid adding photo if the user doesn't want to.
         if (scriptOptions.advanced.check_nullish_link && (getLink ?? "") === "") { // If the script needs to check if the link is nullish, and it's nullish...
             if (scriptOptions.advanced.log_link_error) console.log("SCRIPT ERROR: Failed to get link!"); // If the user wants to print the error in the console, write it
             continue; // And, in general, continue with the next link.
