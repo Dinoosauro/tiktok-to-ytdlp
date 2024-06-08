@@ -18,7 +18,7 @@ The webpage will automatically scroll until no other items are found. Then, a
 file called "TikTokLinks.txt" will be downloaded. You now can download the
 videos with yt-dlp. An example script is:
 
-`yt-dlp -a TikTokLinks.txt -o “TikTok/%(uploader)s/%(title)s - %(id)s.%(ext)s"`
+`yt-dlp -a TikTokLinks.txt -o "TikTok/%(uploader)s/%(title)s - %(id)s.%(ext)s"`
 
 Note that the most important part in this script is `-a TikTokLinks.txt`: by
 writing this, yt-dlp will download all the videos that are in the txt file. You
