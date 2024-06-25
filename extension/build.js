@@ -1,0 +1,14 @@
+const fs = require("fs");
+const zip = require("jszip");
+(fs.existsSync("output")) && fs.rmSync("output", { recursive: true });
+fs.mkdirSync("output");
+require("child_process").execSync("cd code/vite && npm i && npx vite build --base=ui");
+require("fs-extra").moveSync(`./code/vite/dist`, `./output/ui`);
+fs.mkdirSync("output/icons");
+for (let item of ["manifest.json", "icons/16.png", "icons/48.png", "icons/128.png"]) fs.copyFileSync(`./code/${item}`, `./output/${item}`);
+let firstScript = fs.readFileSync(`../script.js`, "utf-8");
+firstScript = firstScript.substring(0, firstScript.indexOf("nodeElaborateCustomArgs();"));
+fs.writeFileSync(`./output/extensionHandler.js`, `${firstScript}${fs.readFileSync("./code/extensionHandler.js", "utf-8")}`);
+const zipFile = new zip();
+for (let file of fs.readdirSync("./output", { recursive: true })) if (fs.statSync(`./output/${file}`).isFile()) zipFile.file(file, fs.readFileSync(`./output/${file}`), { createFolders: true });
+zipFile.generateAsync({ type: "nodebuffer" }).then((buffer) => fs.writeFileSync("output.zip", buffer));

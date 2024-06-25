@@ -23,7 +23,7 @@ var scriptOptions = {
 function nodeElaborateCustomArgs(customTypes) { // A function that is able to read a double array, composed with [["the property name", "the property value"]], and change the value of the scriptOptions array
     if ((customTypes ?? "") !== "") { // If the provided value isn't nullish
         customTypes.forEach(e => { // Get each value
-            let optionChange = e[0].split("=>"); // The arrow (=>) is used to indicate that the property is in a nested object (ex: advanced=>log_link_error).
+            var optionChange = e[0].split("=>"); // The arrow (=>) is used to indicate that the property is in a nested object (ex: advanced=>log_link_error).
             optionChange.length === 1 ? scriptOptions[e[0]] = e[1] : scriptOptions[optionChange[0]][optionChange[1]] = e[1]; // If the length is 1, just change the option. Otherwise, look for the nested object and change its value
         });
     }
@@ -78,7 +78,8 @@ function addArray() {
         }
         if (containerSets[0].indexOf(getLink) === -1 && skipLinks.indexOf(getLink) === -1) { // If the link hasn't been used, add it to the ContainerSets.
             containerSets[0].push(getLink);
-            containerSets[1].push(((getClass[i].querySelector("[data-e2e=video-views]"))?.innerHTML ?? "0").replace("K", "00").replace("M", "00000"));
+            var views = getClass[i].querySelector("[data-e2e=video-views]")?.innerHTML ?? "0";
+            containerSets[1].push(`${views.replace(".", "").replace("K", "00").replace("M", "00000")}${(views.indexOf("K") !== -1 || views.indexOf("M") !== -1) && views.indexOf(".") === -1 ? "0" : ""}`);
         }
     }
 }
@@ -95,9 +96,11 @@ function ytDlpScript() {
     }
     if (scriptOptions.node.isNode && !scriptOptions.node.isResolveTime) return ytDlpScript.split("\n"); else downloadScript(ytDlpScript); // If the user has requested from Node to get the array, get it
 }
-function downloadScript(script) { // Download the script text to a file
-    if (scriptOptions.node.isNode) {
+function downloadScript(script, force) { // Download the script text to a file
+    if (scriptOptions.node.isNode && !force) {
         if (scriptOptions.node.isResolveTime) scriptOptions.node.resolve(script.split("\n")); else return script.split("\n");
+        scriptOptions.node.resolve = null;
+        scriptOptions.node.isResolveTime = false;
         return;
     }
     var blob = new Blob([script], { type: "text/plain" }); // Create a blob with the text
@@ -123,7 +126,7 @@ function downloadScript(script) { // Download the script text to a file
 }
 function requestTxtNow() {
     // Write requestTxtNow() in the console to obtain the .txt file while converting. Useful if you have lots of items, and you want to start downloading them.
-    let value = ytDlpScript();
+    var value = ytDlpScript();
     if (scriptOptions.delete_from_next_txt) { // If delete_from_next_txt is enabled, delete the old items, so that only the newer ones will be downloaded.
         skipLinks.push(...containerSets[0]);
         containerSets = [[], []];
