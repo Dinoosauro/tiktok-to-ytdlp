@@ -5,6 +5,15 @@ etc. from TikTok, and creates a script to download them with yt-dlp
 
 ## Instructions
 
+### From the extension
+
+Download the extension by following the instructions you can find in
+[the extension README](./extension/README.md). Then, change the conversion
+options (if you want to), and click on the button to start the conversion. The
+extesion will take care of everything else.
+
+### From the console
+
 Open the TikTok webpage of the user/sound/etc. you want all the videos
 downloaded. Press Ctrl (or Cmd if you are on a Mac) + Shift + I to open the
 Developer Tools. Go into the Console tab on the top (if you don't see it, click
@@ -13,6 +22,8 @@ on the `>>`) and paste the content you can find in the
 file. If you prefer a minified version, you can find that
 [here](https://raw.githubusercontent.com/Dinoosauro/tiktok-to-ytdlp/main/script.min.js).
 Press enter.
+
+### Next steps
 
 The webpage will automatically scroll until no other items are found. Then, a
 file called "TikTokLinks.txt" will be downloaded. You now can download the
