@@ -159,5 +159,7 @@
   Icons from <a href="https://github.com/microsoft/fluentui-system-icons/"
     >Microsoft's Fluent UI System Icons</a
   ><br />This project is not affiliated or endorsed in any way with TikTok,
-  which is a trademark and a product of ByteDance.
+  which is a trademark and a product of ByteDance.<br /><br /><a
+    href="https://github.com/Dinoosauro/tiktok-to-ytdlp/">View on GitHub</a
+  >
 </p>

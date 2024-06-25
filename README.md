@@ -9,7 +9,8 @@ etc. from TikTok, and creates a script to download them with yt-dlp
 
 Download the extension by following the instructions you can find in
 [the extension README](./extension/README.md). Then, change the conversion
-options (if you want to), and click on the button to start the conversion
+options (if you want to), and click on the button to start the conversion. The
+extesion will take care of everything else.
 
 ### From the console
 

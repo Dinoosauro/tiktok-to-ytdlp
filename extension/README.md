@@ -48,6 +48,22 @@ You'll find two new things:
 - A folder, `output`, with everything needed by the extension
 - A zip file, `output.zip`, that you can use for sideloading it on Firefox.
 
+## The UI
+
+At the top, you can switch between three sections, so that you can edit all the
+settings of tiktok-to-ytdlp.
+
+![The main UI](./readme_images/MainUI.jpg)
+
+Then, at the bottom, you can start the conversion.
+
+![The scroll UI, with the button to start the operation visible](./readme_images/ScrollUI.jpg)
+
+While the script fetches the videos, you can also obtain a partial .txt file of
+the link obtained up to that time.
+
+![The UI while the conversion is being done](./readme_images/ConvertingUI.jpg)
+
 ## Issues
 
 If you have any issues with the building process, or in general with the
