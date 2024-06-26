@@ -132,14 +132,23 @@
       <Advanced></Advanced>
     {/if}<br />
     <Card>
+      <h2>Output options:</h2>
       <label class="flex hcenter autoGap">
         <input
           type="checkbox"
-          bind:value={$Settings.delete_from_next_txt}
+          bind:checked={$Settings.delete_from_next_txt}
           style="background-color: var(--input);"
         />
         Delete the previously-fetched items from partial .txt downloads
-      </label><br /><br />
+      </label><br />
+      <p>Save output file as:</p>
+      <select
+        bind:value={$Settings.export_format}
+        style="background-color: var(--input) !important;"
+      >
+        <option value="txt">Text file</option>
+        <option value="json">JSON file</option>
+      </select><br /><br />
       <button
         on:click={() => sendMessage({ action: "start", content: fixOutput() })}
         >Start video fetching</button
@@ -150,7 +159,7 @@
   <div in:slide={{ duration: 500 }} out:slide={{ duration: 500 }}>
     <h2>Converting items...</h2>
     <button on:click={() => sendMessage({ action: "partial", content: "" })}
-      >Get partial .txt file</button
+      >Get partial file</button
     ><br />
     <i>To stop this operation, refresh the page.</i>
   </div>

@@ -24,7 +24,8 @@ function updateClient() {
             break;
         }
         case "partial": { // Download a part of the script
-            downloadScript(requestTxtNow().join("\n"), true);
+            const request = requestTxtNow();
+            downloadScript(typeof request[0] === "string" ? request.join("\n") : JSON.stringify(request), true);
             break;
         }
         case "requestOperation": { // Ask if a conversion is being done or not.

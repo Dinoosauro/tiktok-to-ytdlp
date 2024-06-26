@@ -8,6 +8,7 @@ let Settings = writable({
     output_name_type: 2, // Put a string to specify a specific name of the file. Put 0 for trying to fetching it using data tags, 1 for fetching it from the window title, 2 for fetching it from the first "h1" element. _Invalid_ inputs will use the standard "TikTokLinks.txt". This will be edited if a different value is passed from the startDownload() function.
     adapt_text_output: true, // Replace characters that are prohibited on Windows
     allow_images: true, // Save also TikTok Image URLs
+    export_format: "txt",
     advanced: {
         get_array_after_scroll: false, // Gets the item links after the webpage is fully scrolled, and not after every scroll.
         get_link_by_filter: true, // Get the website link by inspecting all the links in the container div, instead of looking for data references.

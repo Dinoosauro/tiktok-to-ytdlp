@@ -5,3 +5,5 @@ extension/output
 extension/output.zip
 .noupload
 node
+README_REVIEW.md
+extension/package-lock.json

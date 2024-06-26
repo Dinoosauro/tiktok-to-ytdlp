@@ -7,6 +7,7 @@ var scriptOptions = {
     output_name_type: 2, // Put a string to specify a specific name of the file. Put 0 for trying to fetching it using data tags, 1 for fetching it from the window title, 2 for fetching it from the first "h1" element. _Invalid_ inputs will use the standard "TikTokLinks.txt". This will be edited if a different value is passed from the startDownload() function.
     adapt_text_output: true, // Replace characters that are prohibited on Windows
     allow_images: true, // Save also TikTok Image URLs
+    export_format: "txt", // Put "json" to save everything as a JSON file.
     advanced: {
         get_array_after_scroll: false, // Gets the item links after the webpage is fully scrolled, and not after every scroll.
         get_link_by_filter: true, // Get the website link by inspecting all the links in the container div, instead of looking for data references.
@@ -30,7 +31,7 @@ function nodeElaborateCustomArgs(customTypes) { // A function that is able to re
 }
 // SCRIPT START:
 var height = document.body.scrollHeight;
-var containerSets = [[], []]; // Array: [[Video link], [Video views]]
+var containerSets = new Map([]);
 var skipLinks = []; // Array: [Video link to skip]
 function loadWebpage() {
     if (document.querySelectorAll(".tiktok-qmnyxf-SvgContainer").length === 0) { // Checks if the SVG loading animation is present in the DOM
@@ -39,7 +40,7 @@ function loadWebpage() {
             if (height !== document.body.scrollHeight) { // The webpage has scrolled the previous time, so we can try another scroll
                 if (!scriptOptions.advanced.get_array_after_scroll) {
                     addArray();
-                    if (scriptOptions.advanced.maximum_downloads < (containerSets[0].length + skipLinks.length)) { // If the number of fetched items is above the permitted one, download the script and don't do anything.
+                    if (scriptOptions.advanced.maximum_downloads < (Array.from(containerSets).length + skipLinks.length)) { // If the number of fetched items is above the permitted one, download the script and don't do anything.
                         ytDlpScript();
                         return;
                     }
@@ -53,6 +54,7 @@ function loadWebpage() {
                     if (document.querySelectorAll(".tiktok-qmnyxf-SvgContainer").length === 0 && height == document.body.scrollHeight) { // By scrolling, the webpage height doesn't change, so let's download the txt file
                         scriptOptions.node.isResolveTime = true;
                         ytDlpScript();
+                        skipLinks = []; // Restore so that the items can be re-downloaded
                     } else { // The SVG animation is still there, so there are other contents to load.
                         loadWebpage();
                     }
@@ -76,10 +78,10 @@ function addArray() {
             if (scriptOptions.advanced.log_link_error) console.log("SCRIPT ERROR: Failed to get link!"); // If the user wants to print the error in the console, write it
             continue; // And, in general, continue with the next link.
         }
-        if (containerSets[0].indexOf(getLink) === -1 && skipLinks.indexOf(getLink) === -1) { // If the link hasn't been used, add it to the ContainerSets.
-            containerSets[0].push(getLink);
+        if (skipLinks.indexOf(getLink) === -1) {
             var views = getClass[i].querySelector("[data-e2e=video-views]")?.innerHTML ?? "0";
-            containerSets[1].push(`${views.replace(".", "").replace("K", "00").replace("M", "00000")}${(views.indexOf("K") !== -1 || views.indexOf("M") !== -1) && views.indexOf(".") === -1 ? "0" : ""}`);
+            var caption = getClass[i].querySelector(".css-vi46v1-DivDesContainer a span")?.textContent;
+            containerSets.set(getLink, { views: `${views.replace(".", "").replace("K", "00").replace("M", "00000")}${(views.indexOf("K") !== -1 || views.indexOf("M") !== -1) && views.indexOf(".") === -1 ? "0" : ""}`, caption })
         }
     }
 }
@@ -89,32 +91,35 @@ function sanitizeName(name) { // Replace a name with allowed Windows characters.
 function ytDlpScript() {
     addArray(); // Add the last elements in the DOM, or all the elements if get_array_after_scroll is set to true.
     // Create the txt file with all of the TikTok links.
-    var ytDlpScript = "";
-    for (var x = 0; x < containerSets[0].length; x++) {
-        if (parseInt(containerSets[1][x]) < scriptOptions.min_views) continue;
-        ytDlpScript += `${containerSets[0][x]}\n`;
+    var ytDlpScript = scriptOptions.export_format === "json" ? [] : "";
+    for (var [url, obj] of Array.from(containerSets)) {
+        if (+obj.views < scriptOptions.min_views) continue;
+        scriptOptions.export_format === "json" ? ytDlpScript.push({ ...obj, url }) : ytDlpScript += `${url}\n`;
     }
-    if (scriptOptions.node.isNode && !scriptOptions.node.isResolveTime) return ytDlpScript.split("\n"); else downloadScript(ytDlpScript); // If the user has requested from Node to get the array, get it
+    if (scriptOptions.node.isNode && !scriptOptions.node.isResolveTime) return getWhatToReturn(ytDlpScript); else downloadScript(typeof ytDlpScript === "object" ? JSON.stringify(ytDlpScript) : ytDlpScript); // If the user has requested from Node to get the array, get it
+}
+function getWhatToReturn(content) { // Get if a JSON object array should be returned, or if a splitted string.
+    return typeof content === "object" ? content : content.split("\n");
 }
 function downloadScript(script, force) { // Download the script text to a file
     if (scriptOptions.node.isNode && !force) {
-        if (scriptOptions.node.isResolveTime) scriptOptions.node.resolve(script.split("\n")); else return script.split("\n");
+        if (scriptOptions.node.isResolveTime) scriptOptions.node.resolve(getWhatToReturn(script)); else return getWhatToReturn(script);
         scriptOptions.node.resolve = null;
         scriptOptions.node.isResolveTime = false;
         return;
     }
     var blob = new Blob([script], { type: "text/plain" }); // Create a blob with the text
     var link = document.createElement("a");
-    var name = "TikTokLinks.txt"; // Set the standard name
+    var name = `TikTokLinks.${scriptOptions.export_format}`; // Set the standard name
     switch (scriptOptions.output_name_type) { // Look at the type of the name
         case 0: // Fetch name from data tags
-            name = document.querySelector("[data-e2e=user-title]")?.textContent.trim() ?? document.querySelector("[data-e2e=browse-username]")?.firstChild?.textContent.trim() ?? document.querySelector("[data-e2e=browse-username]")?.textContent.trim() ?? document.querySelector("[data-e2e=challenge-title]")?.textContent.trim() ?? document.querySelector("[data-e2e=music-title]")?.textContent.trim() ?? "TikTokLinks.txt";
+            name = document.querySelector("[data-e2e=user-title]")?.textContent.trim() ?? document.querySelector("[data-e2e=browse-username]")?.firstChild?.textContent.trim() ?? document.querySelector("[data-e2e=browse-username]")?.textContent.trim() ?? document.querySelector("[data-e2e=challenge-title]")?.textContent.trim() ?? document.querySelector("[data-e2e=music-title]")?.textContent.trim() ?? `TikTokLinks.${scriptOptions.export_format}`;
             break;
         case 1: // Fetch name from the website title
-            name = `${document.title.substring(0, document.title.indexOf(" | TikTok"))}.txt`;
+            name = `${document.title.substring(0, document.title.indexOf(" | TikTok"))}.${scriptOptions.export_format}`;
             break;
         case 2: // Fetch name from the first "h1" element on the page
-            name = `${document.querySelector("h1")?.textContent.trim() ?? "TikTokLinks"}.txt`;
+            name = `${document.querySelector("h1")?.textContent.trim() ?? "TikTokLinks"}.${scriptOptions.export_format}`;
             break;
     }
     if (typeof scriptOptions.output_name_type === "string") name = scriptOptions.output_name_type; // If it's a string, apply it to the output name
@@ -128,8 +133,8 @@ function requestTxtNow() {
     // Write requestTxtNow() in the console to obtain the .txt file while converting. Useful if you have lots of items, and you want to start downloading them.
     var value = ytDlpScript();
     if (scriptOptions.delete_from_next_txt) { // If delete_from_next_txt is enabled, delete the old items, so that only the newer ones will be downloaded.
-        skipLinks.push(...containerSets[0]);
-        containerSets = [[], []];
+        skipLinks.push(...Array.from(containerSets).map(item => item[0]));
+        containerSets = new Map([]);
     }
     return value;
 }

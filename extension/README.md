@@ -10,6 +10,9 @@ TamperMonkey for Safari.
 
 ## Installation guide
 
+**Using Firefox? Download it from the
+[Mozilla Addons Store](https://addons.mozilla.org/it/firefox/addon/tiktok-to-ytdlp/)**
+
 While you can build the extension yourself, I recommend you to download the
 built zip file
 [from GitHub Releases](https://github.com/Dinoosauro/tiktok-to-ytdlp/releases/latest).
@@ -28,8 +31,7 @@ If you still have a Chromium-based browser
 
 ### Firefox
 
-Note: In the future, I might release this on Mozilla Addons. For now, follow
-these steps for sideloading it:
+You can simple install it from the Mozilla Addons link above.
 
 1. Go to `about:debugging#/runtime/this-firefox`
 2. Click on `Load Temporary Add-on`
