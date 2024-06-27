@@ -41,7 +41,9 @@ If you need to download a really long list of TikTok, you may want to start
 downloading them while the page continues scrolling. To do that, you can
 download an intermediate file, that will contain all of the links up to the
 point the page has scrolled. To do that, write in the console `requestTxtNow()`,
-press enter and a `TikTokLinks.txt` file will be downloaded.
+press enter and a `TikTokLinks.txt` file will be downloaded. If you're using the
+extension, you can find a "Get partial file" button. Click it and the file will
+be automatically downloaded.
 
 By default, the links in the first intermediate files will be deleted from the
 final (or the second/third etc. file if you want to download more intermediate
@@ -72,6 +74,11 @@ useful settings:
   name.
 - `allow_images`: save also TikTok photos (if disabled, only videos will be
   fetched).
+- `export_format`: you can choose if you want to save the result as a TXT file
+  (`txt`) or as a JSON file (`json`)
+- `exclude_from_json`: populate this array with the keys you don't want to save
+  in your JSON file. By default, the JSON file has the `url`, `caption` and
+  `views` keys.
 
 ### Advanced script options
 

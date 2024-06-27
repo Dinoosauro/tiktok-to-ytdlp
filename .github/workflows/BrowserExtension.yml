@@ -31,6 +31,6 @@ jobs:
       - name: Get last commit SHA
         run: echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Create Release
-        run: gh release create ${{ env.SHORT_COMMIT_SHA }} -t ${{ env.SHORT_COMMIT_SHA }} -n "Note that this release is automatically generated. No testing has been done." --generate-notes "extension/extension.zip"
+        run: gh release create ${{ env.SHORT_COMMIT_SHA }} -t ${{ env.SHORT_COMMIT_SHA }} -n "Note that this release is automatically generated. No testing has been done." --generate-notes "extension/extension.zip" "extension/source.zip"
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
