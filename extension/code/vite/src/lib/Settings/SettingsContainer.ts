@@ -9,6 +9,7 @@ let Settings = writable({
     adapt_text_output: true, // Replace characters that are prohibited on Windows
     allow_images: true, // Save also TikTok Image URLs
     export_format: "txt",
+    exclude_from_json: [], // If you plan to export the content in a JSON file, here you can exclude some properties from the JSON output. You can exclude "url", "views", "caption".
     advanced: {
         get_array_after_scroll: false, // Gets the item links after the webpage is fully scrolled, and not after every scroll.
         get_link_by_filter: true, // Get the website link by inspecting all the links in the container div, instead of looking for data references.

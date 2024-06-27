@@ -3,7 +3,10 @@ TempLinks
 node_modules
 extension/output
 extension/output.zip
+extension/source
+extension/source.zip
 .noupload
 node
 README_REVIEW.md
 extension/package-lock.json
+.DS_Store

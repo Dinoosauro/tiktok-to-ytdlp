@@ -8,6 +8,7 @@
   import Settings from "./lib/Settings/SettingsContainer";
   import { slide } from "svelte/transition";
   import Icon from "./assets/icon.svg";
+  import JsonOutput from "./lib/Settings/JsonOutput.svelte";
   /**
    * The settings section shown
    */
@@ -22,18 +23,20 @@
    */
   let isFirstEvent = true;
   let isAuthorizedForTikTok = true;
+  const newBrowser: typeof chrome =
+    typeof chrome === "undefined" ? browser : chrome; // For older Firefox versions
   Settings.subscribe((settingUpdate) => {
     if (isFirstEvent) {
       isFirstEvent = false;
       return;
     }
-    (chrome ?? browser).storage.sync.set({ settings: settingUpdate });
+    newBrowser.storage.sync.set({ settings: settingUpdate });
   });
   /**
    * Checks if the extension is authorized to access TikTok website
    */
   async function checkPermission() {
-    isAuthorizedForTikTok = await (chrome ?? browser).permissions.contains({
+    isAuthorizedForTikTok = await newBrowser.permissions.contains({
       origins: ["*://*.tiktok.com/*"],
     });
   }
@@ -53,13 +56,13 @@
       return update;
     }
     checkPermission();
-    (chrome ?? browser).storage.sync
+    newBrowser.storage.sync
       .get("settings")
       .then(
         (obj) => ($Settings = UpdateJsonProperties(obj.settings, $Settings)),
       );
 
-    (chrome ?? browser).runtime.onMessage.addListener(
+    newBrowser.runtime.onMessage.addListener(
       (msg) => (isConverting = msg.operation), // Currently, messages from the content_script are sent only when the value of the operation changes
     );
     sendMessage({ action: "requestOperation", content: "" }); // Asks if there's a script operation ongoing.
@@ -85,8 +88,8 @@
    * @param msg the message to send
    */
   async function sendMessage(msg: MessageProps) {
-    const ids = await (chrome ?? browser).tabs.query({ active: true });
-    (chrome ?? browser).tabs.sendMessage(ids[0].id as number, msg);
+    const ids = await newBrowser.tabs.query({ active: true });
+    newBrowser.tabs.sendMessage(ids[0].id as number, msg);
   }
 </script>
 
@@ -106,7 +109,7 @@
     <br />
     <button
       on:click={async () => {
-        await (chrome ?? browser).permissions.request({
+        await newBrowser.permissions.request({
           origins: ["*://*.tiktok.com/*"],
         });
         checkPermission();
@@ -121,6 +124,7 @@
       providedOptions={[
         { id: "output", text: "Output file settings", selected: true },
         { id: "scrollTime", text: "Scrolling time" },
+        { id: "json", text: "JSON Output" },
         { id: "advanced", text: "Advanced settings" },
       ]}
     ></OptionPicker><br />
@@ -128,6 +132,8 @@
       <Output></Output>
     {:else if section === "scrollTime"}
       <Scrolling></Scrolling>
+    {:else if section === "json"}
+      <JsonOutput></JsonOutput>
     {:else if section === "advanced"}
       <Advanced></Advanced>
     {/if}<br />

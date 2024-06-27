@@ -2,9 +2,9 @@
  * Send to the UI the current "conversion" status
  */
 function updateClient() {
-    (chrome ?? browser).runtime.sendMessage((chrome ?? browser).runtime.id, { operation: scriptOptions.node.resolve && !scriptOptions.node.isResolveTime });
+    (typeof chrome === "undefined" ? browser : chrome).runtime.sendMessage((typeof chrome === "undefined" ? browser : chrome).runtime.id, { operation: scriptOptions.node.resolve && !scriptOptions.node.isResolveTime });
 }
-(chrome ?? browser).runtime.onMessage.addListener((message) => {
+(typeof chrome === "undefined" ? browser : chrome).runtime.onMessage.addListener((message) => {
     switch (message.action) {
         case "start": { // Start running the script
             scriptOptions = { ...scriptOptions, ...message.content }; // Add the values from the object provided
