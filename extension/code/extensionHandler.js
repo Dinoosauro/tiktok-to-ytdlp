@@ -15,6 +15,7 @@ function updateClient() {
             ]);
             for (let [key, value] of avoidNullishValues) if (scriptOptions[key] === null) scriptOptions[key] = value;
             if (scriptOptions.advanced.maximum_downloads === null) scriptOptions.advanced.maximum_downloads = Infinity;
+            if (typeof scriptOptions.output_name_type === "string" && ((scriptOptions.export_format === "json" && scriptOptions.output_name_type.indexOf(".json")) === -1 || (scriptOptions.export_format === "txt" && scriptOptions.output_name_type.indexOf(".txt") !== -1))) scriptOptions.output_name_type = `${scriptOptions.output_name_type}.${scriptOptions.export_format}`;
             scriptOptions.node.isNode = true; // Mark this script as it is being used in Node via Puppeteer, so that a Promise will be made, resolved when it's time to download everything. While the download would start in any case, in this way we can also notify the extension UI that the conversion has ended.
             startDownload().then((arr) => {
                 downloadScript(arr.join("\n"), true);

@@ -168,7 +168,7 @@ function downloadScript(script, force) {
     }
     if (typeof scriptOptions.output_name_type === "string") name = scriptOptions.output_name_type; // If it's a string, apply it to the output name
     if (scriptOptions.adapt_text_output) name = sanitizeName(name); // If the user wants to use safe characters only, adapt the string name.
-    link.href = URL.createObjectURL(new File([blob], name, { type: "text/plain" }));
+    link.href = URL.createObjectURL(new File([blob], name, { type: scriptOptions.export_format === "json" ? "application/json" : "text/plain" }));
     link.download = name;
     link.click();
     URL.revokeObjectURL(link.href);
