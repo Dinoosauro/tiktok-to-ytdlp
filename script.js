@@ -14,7 +14,8 @@ var scriptOptions = {
         get_link_by_filter: true, // Get the website link by inspecting all the links in the container div, instead of looking for data references.
         check_nullish_link: true, // Check if a link is nullish and, if true, try with the next video.
         log_link_error: true, // Write in the console if there's an error when fetching the link.
-        maximum_downloads: Infinity // Change this to a finite number to fetch only a specific number of values. Note that a) more elements might be added to the final file if available; and b) "get_array_after_scroll" must be set to false.
+        maximum_downloads: Infinity, // Change this to a finite number to fetch only a specific number of values. Note that a) more elements might be added to the final file if available; and b) "get_array_after_scroll" must be set to false.
+        delete_from_dom: false // Automatically delete the added items from the DOM. This works only if "get_array_after_scroll" is disabled. This is suggested only if you need to download a page with lots of videos
     },
     node: {
         resolve: null,
@@ -49,43 +50,48 @@ var skipLinks = [];
  */
 function loadWebpage() {
     if (document.querySelectorAll(".tiktok-qmnyxf-SvgContainer").length === 0) { // Checks if the SVG loading animation is present in the DOM
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // Scroll to the bottom of the page
+        !scriptOptions.advanced.get_array_after_scroll && scriptOptions.advanced.delete_from_dom && window.scrollTo({ top: document.body.scrollHeight - (window.outerHeight * (window.devicePixelRatio || 1)), behavior: 'smooth' }); // If items from the DOM are removed, the page must be scrolled a little bit higher, so that the TikTok refresh is triggered
         setTimeout(() => {
-            if (height !== document.body.scrollHeight) { // The webpage has scrolled the previous time, so we can try another scroll
-                if (!scriptOptions.advanced.get_array_after_scroll) {
-                    addArray();
-                    if (scriptOptions.advanced.maximum_downloads < (Array.from(containerMap).length + skipLinks.length)) { // If the number of fetched items is above the permitted one, download the script and don't do anything.
-                        ytDlpScript();
-                        return;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // Scroll to the bottom of the page
+            setTimeout(() => {
+                if (height !== document.body.scrollHeight) { // The webpage has scrolled the previous time, so we can try another scroll
+                    if (!scriptOptions.advanced.get_array_after_scroll) {
+                        addArray();
+                        if (scriptOptions.advanced.maximum_downloads < (Array.from(containerMap).length + skipLinks.length)) { // If the number of fetched items is above the permitted one, download the script and don't do anything.
+                            ytDlpScript();
+                            return;
+                        }
                     }
-                }
-                setTimeout(() => {
-                    height = document.body.scrollHeight;
-                    loadWebpage();
-                }, Math.floor(Math.random() * scriptOptions.scrolling_max_time + scriptOptions.scrolling_min_time));
-            } else { // 
-                setTimeout(() => {
-                    if (document.querySelectorAll(".tiktok-qmnyxf-SvgContainer").length === 0 && height == document.body.scrollHeight) { // By scrolling, the webpage height doesn't change, so let's download the txt file
-                        scriptOptions.node.isResolveTime = true;
-                        ytDlpScript();
-                        skipLinks = []; // Restore so that the items can be re-downloaded
-                    } else { // The SVG animation is still there, so there are other contents to load.
+                    setTimeout(() => {
+                        height = document.body.scrollHeight;
                         loadWebpage();
-                    }
-                }, 3500)
-            }
-        }, 150);
+                    }, Math.floor(Math.random() * scriptOptions.scrolling_max_time + scriptOptions.scrolling_min_time));
+                } else {
+                    setTimeout(() => {
+                        if (document.querySelectorAll(".tiktok-qmnyxf-SvgContainer").length === 0 && height == document.body.scrollHeight) { // By scrolling, the webpage height doesn't change, so let's download the txt file
+                            scriptOptions.node.isResolveTime = true;
+                            ytDlpScript();
+                            skipLinks = []; // Restore so that the items can be re-downloaded
+                        } else { // The SVG animation is still there, so there are other contents to load.
+                            loadWebpage();
+                        }
+                    }, 3500)
+                }
+            }, 150);
+        }, !scriptOptions.advanced.get_array_after_scroll && scriptOptions.advanced.delete_from_dom ? Math.floor(Math.random() * 600 + 600) : 1);
     } else { // Let's wait 1 second, so that TikTok has time to load content.
         setTimeout(function () {
             loadWebpage()
         }, 1000);
+
     }
 }
 /**
  * Elaborate items in the page
  */
 function addArray() {
-    for (const tikTokItem of document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2, .css-x6y88p-DivItemContainerV2, .css-1soki6-DivItemContainerForSearch")) { // Class of every video container
+    const container = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2, .css-x6y88p-DivItemContainerV2, .css-1soki6-DivItemContainerForSearch"); // Class of every video container
+    for (const tikTokItem of container) {
         if (!tikTokItem) continue; // Skip nullish results
         const getLink = scriptOptions.advanced.get_link_by_filter ? Array.from(tikTokItem.querySelectorAll("a")).filter(e => e.href.indexOf("/video/") !== -1 || e.href.indexOf("/photo/") !== -1)[0]?.href : tikTokItem.querySelector("[data-e2e=user-post-item-desc], [data-e2e=user-liked-item], [data-e2e=music-item], [data-e2e=user-post-item], [data-e2e=favorites-item], [data-e2e=challenge-item], [data-e2e=search_top-item]")?.querySelector("a")?.href; // If the new filter method is selected, the script will look for the first link that contains a video link structure. Otherwise, the script'll look for data tags that contain the video URL.
         if (!scriptOptions.allow_images && getLink.indexOf("/photo/") !== -1) continue; // Avoid adding photo if the user doesn't want to.
@@ -98,6 +104,9 @@ function addArray() {
             const caption = tikTokItem.querySelector(".css-vi46v1-DivDesContainer a span")?.textContent;
             containerMap.set(getLink, { views: `${views.replace(".", "").replace("K", "00").replace("M", "00000")}${(views.indexOf("K") !== -1 || views.indexOf("M") !== -1) && views.indexOf(".") === -1 ? "0" : ""}`, caption })
         }
+    }
+    if (!scriptOptions.advanced.get_array_after_scroll && scriptOptions.advanced.delete_from_dom) { // Delete all the items from the DOM. Only the last 20 items will be kept.
+        for (const item of Array.from(container).slice(0, container.length - 20)) item.remove();
     }
 }
 /**
@@ -186,6 +195,8 @@ function requestTxtNow() {
     return value;
 }
 function startDownload(name) {
+    containerMap = new Map([]);
+    skipLinks = [];
     if ((name ?? "") !== "") scriptOptions.output_name_type = name; // Update the file name type if it's provided a non-nullish value
     if (scriptOptions.node.isNode) {
         return new Promise((resolve) => {

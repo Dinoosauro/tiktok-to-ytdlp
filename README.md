@@ -101,10 +101,16 @@ what it should do when errors are found.
 - `log_link_error`: write to the console if a link is nullish.
 - `maximum_downloads`: if the number of fetched items is above this number, the
   fetching process will be stopped
-  - The `get_array_after_scroll` variable must be set to true
+  - The `get_array_after_scroll` variable must be set to false
   - If more items than this number can be fetched without continuing scrolling,
     they'll also be added. Therefore, the output number might be greater than
     this variable.
+- `delete_from_dom`: Delete the previous items form the DOM, so that
+  performances can be improved. Note that this is experimental and might break
+  TikTok's webpage in the future. Therefore, use it only if you need to (for big
+  pages)
+  - Remember to set the `get_array_after_scroll` variable to false. Otherwise,
+    this value will be ignored.
 
 ## Warning:
 
