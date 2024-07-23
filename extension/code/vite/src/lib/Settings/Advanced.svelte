@@ -54,9 +54,23 @@
                 <input
                     type="checkbox"
                     bind:checked={$Settings.advanced.get_array_after_scroll}
-                /> Get the array after each scroll, instead of getting it at the
-                end
-            </label>
+                /> Get the array at the end, instead of getting it after each scroll
+            </label><br />
+            {#if !$Settings.advanced.get_array_after_scroll}
+                <label
+                    class="flex hcenter autoGap"
+                    in:slide={{ duration: 200 }}
+                    out:slide={{ duration: 200 }}
+                >
+                    <input
+                        type="checkbox"
+                        bind:checked={$Settings.advanced.delete_from_dom}
+                    />
+                    Automatically delete items from the DOM, so that page performances
+                    can be improved. [Experimental: enable this only if you need
+                    to]
+                </label>
+            {/if}
         </Card>
     </Card>
 </div>
