@@ -27,6 +27,16 @@
             <label class="flex hcenter autoGap">
                 <input
                     type="checkbox"
+                    bind:checked={$Settings.advanced
+                        .get_video_container_from_e2e}
+                />
+                Use the [data-e2e] attributes for getting the video container, instead
+                of the normal CSS class. Enable this if the extraction fails
+            </label><br />
+
+            <label class="flex hcenter autoGap">
+                <input
+                    type="checkbox"
                     bind:checked={$Settings.advanced.log_link_error}
                 />
                 Log errors occurred while getting the URL in the console

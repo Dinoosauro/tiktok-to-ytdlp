@@ -16,7 +16,8 @@ let Settings = writable({
         check_nullish_link: true, // Check if a link is nullish and, if true, try with the next video.
         log_link_error: true, // Write in the console if there's an error when fetching the link.
         maximum_downloads: Infinity, // Change this to a finite number to fetch only a specific number of values. Note that a) more elements might be added to the final file if available; and b) "get_array_after_scroll" must be set to false.
-        delete_from_dom: false // Automatically delete the added items from the DOM. This works only if "get_array_after_scroll" is disabled. This is suggested only if you need to download a page with lots of videos
+        delete_from_dom: false, // Automatically delete the added items from the DOM. This works only if "get_array_after_scroll" is disabled. This is suggested only if you need to download a page with lots of videos
+        get_video_container_from_e2e: false // Use the [data-e2e] attributes for getting the video container, instead of the normal CSS class.
     },
     __extension: {
         fileName: ""

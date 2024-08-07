@@ -15,7 +15,8 @@ var scriptOptions = {
         check_nullish_link: true, // Check if a link is nullish and, if true, try with the next video.
         log_link_error: true, // Write in the console if there's an error when fetching the link.
         maximum_downloads: Infinity, // Change this to a finite number to fetch only a specific number of values. Note that a) more elements might be added to the final file if available; and b) "get_array_after_scroll" must be set to false.
-        delete_from_dom: false // Automatically delete the added items from the DOM. This works only if "get_array_after_scroll" is disabled. This is suggested only if you need to download a page with lots of videos
+        delete_from_dom: false, // Automatically delete the added items from the DOM. This works only if "get_array_after_scroll" is disabled. This is suggested only if you need to download a page with lots of videos
+        get_video_container_from_e2e: false // Use the [data-e2e] attributes for getting the video container, instead of the normal CSS class.
     },
     node: {
         resolve: null,
@@ -90,18 +91,20 @@ function loadWebpage() {
  * Elaborate items in the page
  */
 function addArray() {
-    const container = document.querySelectorAll(".tiktok-x6y88p-DivItemContainerV2, .css-x6y88p-DivItemContainerV2, .css-1soki6-DivItemContainerForSearch"); // Class of every video container
+    const e2eLinks = "[data-e2e=user-liked-item], [data-e2e=music-item], [data-e2e=user-post-item], [data-e2e=favorites-item], [data-e2e=challenge-item], [data-e2e=search_top-item]";
+    let container = document.querySelectorAll(scriptOptions.advanced.get_video_container_from_e2e ? e2eLinks : ".tiktok-x6y88p-DivItemContainerV2, .css-x6y88p-DivItemContainerV2, .css-1soki6-DivItemContainerForSearch, .css-ps7kg7-DivThreeColumnItemContainer"); // Class of every video container
+    if (scriptOptions.advanced.get_video_container_from_e2e) container = Array.from(container).map(item => item.parentElement);
     for (const tikTokItem of container) {
         if (!tikTokItem) continue; // Skip nullish results
-        const getLink = scriptOptions.advanced.get_link_by_filter ? Array.from(tikTokItem.querySelectorAll("a")).filter(e => e.href.indexOf("/video/") !== -1 || e.href.indexOf("/photo/") !== -1)[0]?.href : tikTokItem.querySelector("[data-e2e=user-post-item-desc], [data-e2e=user-liked-item], [data-e2e=music-item], [data-e2e=user-post-item], [data-e2e=favorites-item], [data-e2e=challenge-item], [data-e2e=search_top-item]")?.querySelector("a")?.href; // If the new filter method is selected, the script will look for the first link that contains a video link structure. Otherwise, the script'll look for data tags that contain the video URL.
+        const getLink = scriptOptions.advanced.get_link_by_filter ? Array.from(tikTokItem.querySelectorAll("a")).filter(e => e.href.indexOf("/video/") !== -1 || e.href.indexOf("/photo/") !== -1)[0]?.href : tikTokItem.querySelector(`[data-e2e=user-post-item-desc], ${e2eLinks}`)?.querySelector("a")?.href; // If the new filter method is selected, the script will look for the first link that contains a video link structure. Otherwise, the script'll look for data tags that contain the video URL.
         if (!scriptOptions.allow_images && getLink.indexOf("/photo/") !== -1) continue; // Avoid adding photo if the user doesn't want to.
         if (scriptOptions.advanced.check_nullish_link && (getLink ?? "") === "") { // If the script needs to check if the link is nullish, and it's nullish...
             if (scriptOptions.advanced.log_link_error) console.log("SCRIPT ERROR: Failed to get link!"); // If the user wants to print the error in the console, write it
             continue; // And, in general, continue with the next link.
         }
         if (skipLinks.indexOf(getLink) === -1) {
-            const views = tikTokItem.querySelector("[data-e2e=video-views]")?.innerHTML ?? "0";
-            const caption = tikTokItem.querySelector(".css-vi46v1-DivDesContainer a span")?.textContent;
+            const views = tikTokItem.querySelector(".css-cralc2-SpanPlayCount, [data-e2e=video-views]")?.innerHTML ?? "0";
+            const caption = tikTokItem.querySelector(".css-vi46v1-DivDesContainer a span")?.textContent ?? tikTokItem.querySelector(".css-a3te33-AVideoContainer picture img")?.alt ?? "";
             containerMap.set(getLink, { views: `${views.replace(".", "").replace("K", "00").replace("M", "00000")}${(views.indexOf("K") !== -1 || views.indexOf("M") !== -1) && views.indexOf(".") === -1 ? "0" : ""}`, caption })
         }
     }

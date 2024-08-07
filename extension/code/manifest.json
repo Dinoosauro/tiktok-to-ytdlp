@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "tiktok-to-ytdlp",
   "description": "Get a .txt file of all the TikTok videos from an user/audio/hashtag/liked videos/saved videos etc, so that they can be downloaded with yt-dlp.",
-  "version": "1.2",
+  "version": "1.3",
   "permissions": ["storage"],
   "action": {
     "default_popup": "./ui/index.html"

@@ -2,5 +2,8 @@
   "dependencies": {
     "fs-extra": "^11.2.0",
     "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "web-ext": "^8.2.0"
   }
 }
