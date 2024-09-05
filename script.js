@@ -92,7 +92,7 @@ function loadWebpage() {
  */
 function addArray() {
     const e2eLinks = "[data-e2e=user-liked-item], [data-e2e=music-item], [data-e2e=user-post-item], [data-e2e=favorites-item], [data-e2e=challenge-item], [data-e2e=search_top-item]";
-    let container = document.querySelectorAll(scriptOptions.advanced.get_video_container_from_e2e ? e2eLinks : ".tiktok-x6y88p-DivItemContainerV2, .css-x6y88p-DivItemContainerV2, .css-1soki6-DivItemContainerForSearch, .css-ps7kg7-DivThreeColumnItemContainer"); // Class of every video container
+    let container = document.querySelectorAll(scriptOptions.advanced.get_video_container_from_e2e ? e2eLinks : ".tiktok-1uqux2o-DivItemContainerV2, .css-ps7kg7-DivThreeColumnItemContainer, .tiktok-x6y88p-DivItemContainerV2, .css-1uqux2o-DivItemContainerV2, .css-x6y88p-DivItemContainerV2, .css-1soki6-DivItemContainerForSearch, .css-ps7kg7-DivThreeColumnItemContainer"); // Class of every video container
     if (scriptOptions.advanced.get_video_container_from_e2e) container = Array.from(container).map(item => item.parentElement);
     for (const tikTokItem of container) {
         if (!tikTokItem) continue; // Skip nullish results
